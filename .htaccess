@@ -1,0 +1,7 @@
+Options -Indexes
+Order deny,allow
+Deny from all
+
+<Files "pelv.php">
+	Allow from all
+</Files>
