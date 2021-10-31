@@ -1,4 +1,89 @@
 <?php
+include dirname(__FILE__) . '/pelv.config.php';
+session_start();
+$log_file = isset($_SESSION['log_file']) ? $_SESSION['log_file'] : '';
+if(isset($_GET['log_file'])) {
+	$_SESSION['log_file'] = $_GET['log_file'];
+}
+
+if(isset($_POST['password'])) {
+	if($_POST['password']==$pelv['password']) {
+		$_SESSION['user'] = 'user';
+	} else {
+		unset($_SESSION);
+		session_destroy();
+	}	
+}
+
+if(!isset($_SESSION) || !isset($_SESSION['user']) || $_SESSION['user']=='') {
+$login_form = '
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html class="md-theme-default"><head>
+<title>Login Required</title>
+<meta content="width=device-width,initial-scale=1,minimal-ui" name="viewport">
+<link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons">
+<link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/vue-material.min.css">
+<link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/theme/default-dark.css">
+<style>
+#app {
+	max-width:200px;
+	margin:14px;
+}
+.md-primary {
+	background:rgb(213,0,0);
+	color:#fff;
+}
+</style>
+</head><body><div id="app">
+<form method="post">
+<div class="md-field md-toolbar-section-end md-theme-default md-clearable md-has-placeholder"><input type="password" name="password" class="md-input" placeholder="Password..." /></div>
+<div><button type="submit" class="md-raised md-primary md-button md-ink-ripple">Login</button></p>
+</form></div>
+</body></html>
+';
+	die($login_form);
+}
+
+if(isset($_SESSION) && isset($_SESSION['user']) && $_SESSION['user']!='user' && ($log_file=='' || isset($_GET['select_log']))) {
+
+	$select_log = '
+	<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+	<html class="md-theme-default"><head>
+	<title>Select log file</title>
+	<meta content="width=device-width,initial-scale=1,minimal-ui" name="viewport">
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons">
+	<link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/vue-material.min.css">
+	<link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/theme/default-dark.css">
+	<style>
+	#app {
+		max-width:200px;
+		margin:14px;
+	}
+	.md-primary {
+		background:rgb(213,0,0);
+		color:#fff;
+	}
+	</style>
+	</head><body><div id="app">';
+
+	$log_directory = array_diff(scandir($pelv['log_folder']), array('..', '.'));
+
+	foreach($log_directory as $filename) {
+		$select_log.= '<p><a href="?log_file='.$filename.'">'.$filename.'</a></p>';
+	}
+
+	if(count($log_directory)==0) {
+		$select_log.= '<p>No files in defined folder</p>';
+	}
+	
+	$select_log.= '</div>
+	</body></html>
+	';
+	die($select_log);
+}
+
 /**
  * PHP Error Log Viewer.
  * Check readme.md for more information.
@@ -7,12 +92,9 @@
  * - This contains code for deleting your log-file.
  * - It is meant for development-environments
  */
-
-$pelv_path = 'php-error-log-viewer.ini';
-// search settings directly outside the vendor folder.
-$pelv_settings = file_exists( '../../' . $pelv_path ) ? parse_ini_file( '../../' . $pelv_path ) : array();
-// search settings in the same folder as the file.
-$pelv_settings = file_exists( $pelv_path ) ? parse_ini_file( $pelv_path ) : $pelv_settings;
+$pelv_settings = array(
+	file_path => $pelv['log_folder'] . $log_file,
+);
 
 $pelv_log_handler = new Pelv_Log_Handler( $pelv_settings );
 
@@ -270,7 +352,7 @@ class Pelv_Log_Handler {
 	<md-table v-model="rowsDisplay" :md-sort.sync="currentSort" :md-sort-order.sync="currentSortOrder"ref="mytable" md-card md-fixed-header>
 		<md-chip v-if="filesize">{{ readableFilesize() }}<!--needed for the inner filesize container to update--></md-chip>
 		<md-table-toolbar>
-			<h1 class="md-title" >Debug.log <md-chip v-if="filesize">{{ readableFilesize() }}</md-chip></h1>
+			<h1 class="md-title" ><a href="?select_log"><?php echo $_SESSION['log_file']; ?> <md-chip v-if="filesize">{{ readableFilesize() }}</a></md-chip></h1>
 			<div class="md-toolbar-section-start">
 			</div>
 			<md-field md-clearable class="md-toolbar-section-end">
