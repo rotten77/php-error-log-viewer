@@ -9,7 +9,7 @@ if(isset($_GET['log_file'])) {
 
 if(isset($_POST['password'])) {
 	if($_POST['password']==$pelv['password'] && $_POST['user']==$pelv['user']) {
-		$_SESSION['user'] = 'user';
+		$_SESSION['user'] = $pelv['user'];
 		$_SESSION['log_file'] = '';
 	} else {
 		unset($_SESSION);
@@ -51,14 +51,14 @@ $login_form = '
 <form method="post" action="?select_log">
 <div class="md-field md-toolbar-section-end md-theme-default md-clearable md-has-placeholder"><input type="text" name="user" class="md-input" placeholder="User" /></div>
 <div class="md-field md-toolbar-section-end md-theme-default md-clearable md-has-placeholder"><input type="password" name="password" class="md-input" placeholder="Password" /></div>
-<div><button type="submit" class="md-raised md-primary md-button md-ink-ripple">Login</button></p>
-</form></div>
+<div><button type="submit" name="login" class="md-raised md-primary md-button md-ink-ripple">Login</button></div>
+</form>
 </body></html>
 ';
 	die($login_form);
 }
 
-if((isset($_SESSION) && isset($_SESSION['user']) && $_SESSION['user']=='user') && ($log_file=='' || isset($_GET['select_log']))) {
+if((isset($_SESSION) && isset($_SESSION['user']) && $_SESSION['user']==$pelv['user']) && ($log_file=='' || isset($_GET['select_log']))) {
 
 	$select_log = '
 	<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
