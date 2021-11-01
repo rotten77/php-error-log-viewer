@@ -17,6 +17,11 @@ if(isset($_POST['password'])) {
 	}	
 }
 
+if(isset($_REQUEST['logout'])) {
+	unset($_SESSION);
+	session_destroy();
+}
+
 $log_file = isset($_SESSION['log_file']) ? $_SESSION['log_file'] : '';
 
 if(!isset($_SESSION) || !isset($_SESSION['user']) || $_SESSION['user']=='') {
@@ -43,7 +48,7 @@ $login_form = '
 }
 </style>
 </head><body><div id="app">
-<form method="post">
+<form method="post" action="?select_log">
 <div class="md-field md-toolbar-section-end md-theme-default md-clearable md-has-placeholder"><input type="text" name="user" class="md-input" placeholder="User" /></div>
 <div class="md-field md-toolbar-section-end md-theme-default md-clearable md-has-placeholder"><input type="password" name="password" class="md-input" placeholder="Password" /></div>
 <div><button type="submit" class="md-raised md-primary md-button md-ink-ripple">Login</button></p>
